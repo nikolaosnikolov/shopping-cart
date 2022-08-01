@@ -1,12 +1,58 @@
-// Ex 2 - remove any item from navbar with less than 2 in stock
-function NavBar({ menuitems, minstock }) {
-  let list1 = menuitems.filter(item => item.instock >= minstock);
-  let list2 = list1.map((item, index) => {
-    return <li key={index.toString()}>{item.name}:{item.instock}</li>;
-  });
+// Ex 3 - write out all items with their stock number
+// provide a button and use onClick to move 1 item into the Shopping Cart
+// use React.useState to keep track of items in the Cart.
+// list out the Cart items in another column
+function NavBar({ menuitems }) {
+  const { Button } = ReactBootstrap;
+  const [stock, setStock] = React.useState(menuitems);
+  const [cart, setCart] = React.useState([]);
+  const moveToCart = (e) => {
+    let [name, num] = e.target.innerHTML.split(":");
+    if (num <= 0) return; // zero items in stock
+    // get item with name from stock and update stock
+    let item = stock.filter((item) => item.name == name);
+    // check if its in stock ie item.instock > 0
+    let newStock = stock.map((item) => {
+      if (item.name == name) {
+        item.instock--;
+      }
+      return item;
+    });
+    // now filter out stock items == 0;
 
+    setStock([...newStock]);
+    setCart([...cart, ...item]); // for now don't worry about repeat items in Cart
+    console.log(`Cart: ${JSON.stringify(cart)}`);
+  };
+  const updatedList = menuitems.map((item, index) => {
+    return (
+      <Button key={index} onClick={moveToCart}>
+        {item.name}:{item.instock}
+      </Button>
+    );
+  });
   // note that React needs to have a single Parent
-  return <ul style={{ listStyleType: "none" }}>{list2}</ul>;
+  return (
+    <>
+      <ul key="stock" style={{ listStyleType: "none" }}>
+        {updatedList}
+      </ul>
+      <h1>Shopping Cart</h1>
+      <Cart cartitems={cart}> Cart Items</Cart>
+    </>
+  );
+}
+function Cart({ cartitems }) {
+  const { Button } = ReactBootstrap;
+  console.log("rendering Cart");
+  const updatedList = cartitems.map((item, index) => {
+    return <Button key={index}>{item.name}</Button>;
+  });
+  return (
+    <ul style={{ listStyleType: "none" }} key="cart">
+      {updatedList}
+    </ul>
+  );
 }
 
 const menuItems = [
@@ -14,8 +60,8 @@ const menuItems = [
   { name: "pineapple", instock: 3 },
   { name: "pear", instock: 0 },
   { name: "peach", instock: 3 },
-  { name: "orange", instock: 1 }
+  { name: "orange", instock: 1 },
 ];
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
-root.render(<NavBar menuitems={menuItems} minstock={2} />)
+root.render(<NavBar menuitems={menuItems} />)
